@@ -1,0 +1,33 @@
+services:
+  mongo_db_productos:
+    image: mongo:latest
+    container_name: mongo_db_productos
+    ports:
+      - "27018:27018"  # cambia el puerto del HOST a 27018
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    volumes:
+      - mongo_data_productos:/data/db
+    networks:
+      - microservices_network
+
+  spring_app_productos:
+    build: .
+    container_name: spring_app_productos
+    depends_on:
+      - mongo_db_productos
+    ports:
+      - "8003:8003"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://admin:admin123@mongo_db_productos:27017/db_productos?authSource=admin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+    networks:
+      - microservices_network
+
+volumes:
+  mongo_data_productos:
+
+networks:
+  microservices_network:
+    external: true
